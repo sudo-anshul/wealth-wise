@@ -1,0 +1,197 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --radius: 0.5rem;
+}
+
+@layer base {
+  /* Base styles that apply to both themes */
+  body {
+    @apply font-['Inter'] min-h-screen antialiased;
+  }
+}
+
+/* Theme variables */
+
+/* Dark theme (default) */
+.theme-dark {
+  --background: #0A0A0A;
+  --foreground: #FFFFFF;
+  --card: rgba(255, 255, 255, 0.05);
+  --card-foreground: #FFFFFF;
+  --popover: rgba(10, 10, 10, 0.95);
+  --popover-foreground: #FFFFFF;
+  --primary: #00DC82;
+  --primary-foreground: #FFFFFF;
+  --secondary: #121212;
+  --secondary-foreground: #FFFFFF;
+  --muted: rgba(255, 255, 255, 0.1);
+  --muted-foreground: rgba(255, 255, 255, 0.6);
+  --accent: #6366F1;
+  --accent-foreground: #FFFFFF;
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.1);
+  --ring: rgba(255, 255, 255, 0.2);
+}
+
+/* Light theme */
+.theme-light {
+  --background: #FFFFFF;
+  --foreground: #0A0A0A;
+  --card: rgba(0, 0, 0, 0.02);
+  --card-foreground: #0A0A0A;
+  --popover: rgba(255, 255, 255, 0.95);
+  --popover-foreground: #0A0A0A;
+  --primary: #00AA65;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F5F5F5;
+  --secondary-foreground: #0A0A0A;
+  --muted: rgba(0, 0, 0, 0.05);
+  --muted-foreground: rgba(0, 0, 0, 0.6);
+  --accent: #4F46E5;
+  --accent-foreground: #FFFFFF;
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --border: rgba(0, 0, 0, 0.1);
+  --input: rgba(0, 0, 0, 0.1);
+  --ring: rgba(0, 0, 0, 0.2);
+}
+
+/* Theme-specific styling */
+.theme-dark body {
+  background: linear-gradient(to bottom right, #0A0A0A, #121212);
+  color: var(--foreground);
+}
+
+.theme-light body {
+  background: linear-gradient(to bottom right, #F9F9F9, #FFFFFF);
+  color: var(--foreground);
+}
+
+@layer components {
+  /* Glass card styles */
+  .glass-card {
+    @apply rounded-xl border shadow backdrop-blur-md;
+  }
+
+  .theme-dark .glass-card {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .theme-light .glass-card {
+    background-color: rgba(255, 255, 255, 0.8);
+    border-color: rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Custom component styling */
+  .profile-menu-item-icon {
+    @apply w-5 h-5;
+  }
+
+  .theme-dark .profile-menu-item-icon {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .theme-light .profile-menu-item-icon {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  /* Text gradient */
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+  }
+
+  .theme-dark .text-gradient {
+    background-image: linear-gradient(to right, var(--primary), var(--accent));
+  }
+
+  .theme-light .text-gradient {
+    background-image: linear-gradient(to right, var(--primary), var(--accent));
+  }
+
+  /* Button theme variants */
+  .theme-light button.primary {
+    @apply bg-primary text-white;
+  }
+  
+  .theme-light button.primary:hover {
+    background-color: var(--primary);
+    opacity: 0.9;
+  }
+
+  .theme-light button.secondary {
+    @apply bg-secondary text-secondary-foreground;
+  }
+  
+  .theme-light button.secondary:hover {
+    background-color: var(--secondary);
+    opacity: 0.8;
+  }
+
+  /* Login and Signup card fixes */
+  .theme-light .glass-card input {
+    @apply bg-white/90 border-black/10 text-black placeholder:text-black/40;
+  }
+
+  .theme-dark .glass-card input {
+    @apply bg-white/5 border-white/10 text-white placeholder:text-white/40;
+  }
+
+  /* Navigation and menu fixes */
+  .theme-light nav {
+    @apply bg-white/80 border-black/5;
+  }
+
+  .theme-light .dropdown-content {
+    @apply bg-white text-black shadow-lg;
+  }
+
+  .theme-dark .dropdown-content {
+    @apply bg-gray-900 text-white shadow-lg;
+  }
+
+  /* Card fixes for feature cards on landing page */
+  .theme-light .feature-card {
+    @apply bg-white/80 border border-black/5 shadow;
+  }
+
+  .theme-dark .feature-card {
+    @apply bg-white/5 border border-white/10;
+  }
+
+  /* Fix for Login and Signup pages */
+  .theme-light .auth-container {
+    @apply bg-gradient-to-br from-white via-white to-secondary;
+  }
+
+  .theme-dark .auth-container {
+    @apply bg-gradient-to-br from-background via-background to-secondary;
+  }
+}
+
+@layer utilities {
+  /* Fix for input fields in light mode */
+  .theme-light input,
+  .theme-light textarea {
+    @apply text-foreground border-input bg-background;
+  }
+  
+  /* Animations */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+}

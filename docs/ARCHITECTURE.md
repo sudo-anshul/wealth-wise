@@ -1,3 +1,4 @@
+
 # Project Architecture
 
 This document provides an overview of the InvestAI Assistant architecture and design decisions.

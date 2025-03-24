@@ -1,3 +1,4 @@
+
 # Contributing to InvestAI Assistant
 
 Thank you for your interest in contributing to InvestAI Assistant! This document provides guidelines and instructions for contributing to this project.
