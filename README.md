@@ -1,4 +1,5 @@
-
+Stock simulator : https://github.com/sudo-anshul/stock-market-simulator
+Multi Agent : https://github.com/sudo-anshul/multi-agent-advisor
 # InvestAI Assistant
 
 A modern investment guidance platform with AI-powered insights, portfolio management, and market analysis tools.
