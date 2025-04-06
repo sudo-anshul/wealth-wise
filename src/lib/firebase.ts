@@ -6,13 +6,13 @@ import { getFirestore } from 'firebase/firestore';
 // Your web app's Firebase configuration
 // Replace these with your actual Firebase configuration values
 const firebaseConfig = {
-  apiKey: "AIzaSyDs6Ipz-o8rzNWGqBHkBIZEJiJmlTDp_wo",
-  authDomain: "wealth-wise-54.firebaseapp.com",
-  projectId: "wealth-wise-54",
-  storageBucket: "wealth-wise-54.firebasestorage.app",
-  messagingSenderId: "836566642676",
-  appId: "1:836566642676:web:e1e9129347ca7909cfd3a1",
-  measurementId: "G-W943MRKDLB"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase services
