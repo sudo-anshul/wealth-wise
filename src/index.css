@@ -176,6 +176,58 @@
   .theme-dark .auth-container {
     @apply bg-gradient-to-br from-background via-background to-secondary;
   }
+  
+  /* Markdown content styling */
+  .markdown-content h1, 
+  .markdown-content h2, 
+  .markdown-content h3 {
+    @apply font-semibold my-3;
+  }
+  
+  .markdown-content h1 {
+    @apply text-lg;
+  }
+  
+  .markdown-content h2 {
+    @apply text-base;
+  }
+  
+  .markdown-content h3 {
+    @apply text-sm;
+  }
+  
+  .markdown-content p {
+    @apply mb-2;
+  }
+  
+  .markdown-content ul, 
+  .markdown-content ol {
+    @apply ml-5 mb-2;
+  }
+  
+  .markdown-content ul {
+    @apply list-disc;
+  }
+  
+  .markdown-content ol {
+    @apply list-decimal;
+  }
+  
+  .markdown-content li {
+    @apply mb-1;
+  }
+  
+  .markdown-content strong {
+    @apply font-semibold;
+  }
+  
+  .markdown-content hr {
+    @apply my-3 border-white/20;
+  }
+  
+  .theme-light .markdown-content hr {
+    @apply border-black/20;
+  }
 }
 
 @layer utilities {

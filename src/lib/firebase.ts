@@ -6,12 +6,20 @@ import { getFirestore } from 'firebase/firestore';
 // Your web app's Firebase configuration
 // Replace these with your actual Firebase configuration values
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDs6Ipz-o8rzNWGqBHkBIZEJiJmlTDp_wo",
+
+  authDomain: "wealth-wise-54.firebaseapp.com",
+
+  projectId: "wealth-wise-54",
+
+  storageBucket: "wealth-wise-54.firebasestorage.app",
+
+  messagingSenderId: "836566642676",
+
+  appId: "1:836566642676:web:e1e9129347ca7909cfd3a1",
+
+  measurementId: "G-W943MRKDLB"
+
 };
 
 // Initialize Firebase services

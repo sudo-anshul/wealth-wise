@@ -1,5 +1,6 @@
 
 import { User, Bot } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 
 interface ChatMessageProps {
   message: {
@@ -17,7 +18,13 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
         {isUser ? <User className="h-5 w-5 text-primary" /> : <Bot className="h-5 w-5 text-white/80" />}
       </div>
       <div className={`flex-1 glass-card p-4 rounded-xl max-w-[80%] ${isUser ? 'bg-primary/5' : ''}`}>
-        <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+        {isUser ? (
+          <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+        ) : (
+          <div className="text-sm leading-relaxed markdown-content">
+            <ReactMarkdown>{message.content}</ReactMarkdown>
+          </div>
+        )}
       </div>
     </div>
   );
