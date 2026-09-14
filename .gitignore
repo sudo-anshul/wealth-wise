@@ -1,4 +1,14 @@
-node_modules
-.env
-.gitignore
+node_modules/
+.next/
+.env*
+!.env.example
+.vercel/
+*.tsbuildinfo
+coverage/
+test-results/
+playwright-report/
 .DS_Store
+work/
+.supabase/
+supabase/.temp/
+supabase/.branches/

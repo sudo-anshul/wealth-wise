@@ -1,0 +1,2 @@
+import Link from 'next/link';
+export default function Home(){return <main style={{maxWidth:960,margin:'100px auto',padding:32}}><p className="eyebrow">WealthWise</p><h1 style={{fontFamily:'var(--serif)',fontSize:76,fontWeight:400,margin:'20px 0'}}>A clearer view.<br/>A richer life.</h1><p>Your personal finance workspace, thoughtfully rebuilt.</p><Link href="/demo/overview" className="button button-primary" style={{marginTop:24}}>Explore your money</Link></main>;}
