@@ -8,7 +8,7 @@ const month = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/);
 export const categories = ['Salary', 'Other income', 'Housing', 'Food', 'Transport', 'Shopping', 'Health', 'Learning', 'Entertainment', 'Utilities', 'Other', 'Transfer'] as const;
 export const accountSchema = z.object({ id: idSchema, name, type: z.enum(['cash', 'savings', 'retirement']), openingBalanceMinor: moneySchema });
 export const transactionSchema = z.object({ id: idSchema, accountId: idSchema, date, description: name, category: z.enum(categories), amountMinor: z.number().int().safe().min(-100_000_000_000).max(100_000_000_000).refine(v => v !== 0, 'Amount must be non-zero'), transferId: idSchema.optional() });
-export const holdingSchema = z.object({ id: idSchema, name, symbol: z.string().trim().min(1).max(24), assetClass: z.enum(['Equity', 'Mutual fund', 'ETF', 'Gold', 'Other']), quantity: z.number().positive().max(1_000_000).multipleOf(0.000001), averageCostMinor: moneySchema, priceMinor: moneySchema, asOf: date });
+export const holdingSchema = z.object({ id: idSchema, name, symbol: z.string().trim().min(1).max(24), assetClass: z.enum(['Equity', 'Mutual fund', 'ETF', 'Gold', 'Other']), quantity: z.number().positive().max(1_000_000).multipleOf(0.000001), averageCostMinor: moneySchema, priceMinor: moneySchema, asOf: date }).refine(h=>Number.isSafeInteger(Math.round(h.quantity*h.priceMinor))&&Number.isSafeInteger(Math.round(h.quantity*h.averageCostMinor)), 'Position value exceeds the supported precision.');
 export const budgetSchema = z.object({ id: idSchema, category: z.enum(categories), month, limitMinor: moneySchema.positive() });
 export const goalSchema = z.object({ id: idSchema, name, targetMinor: moneySchema.positive(), savedMinor: moneySchema, monthlyMinor: moneySchema, targetDate: date, color: z.enum(['forest', 'coral', 'lime']).default('forest') });
 export const debtSchema = z.object({ id: idSchema, name, balanceMinor: moneySchema, annualRate: z.number().min(0).max(60), remainingMonths: z.number().int().min(1).max(600) });
@@ -20,7 +20,10 @@ export const workspaceSchema = z.object({
   budgets: z.array(budgetSchema).max(1000), goals: z.array(goalSchema).max(100), debts: z.array(debtSchema).max(100),
   watchlist: z.array(z.string().max(24)).max(100), completedLessons: z.array(z.string().max(80)).max(100), scenarios: z.array(scenarioSchema).max(100),
   practiceOrders: z.array(practiceOrderSchema).max(2000), preferences: preferencesSchema
-});
+}).refine(s=>{
+  const gross=s.accounts.reduce((a,x)=>a+x.openingBalanceMinor,0)+s.transactions.reduce((a,x)=>a+Math.abs(x.amountMinor),0)+s.holdings.reduce((a,x)=>a+Math.round(x.quantity*x.priceMinor)+Math.round(x.quantity*x.averageCostMinor),0)+s.debts.reduce((a,x)=>a+x.balanceMinor,0);
+  return Number.isSafeInteger(gross);
+},'The combined workspace values exceed the supported precision.');
 export const commandSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('upsert-account'), account: accountSchema }),
   z.object({ type: z.literal('delete-account'), id: idSchema }),

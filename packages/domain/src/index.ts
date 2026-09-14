@@ -10,7 +10,7 @@ export const instruments = [
   { symbol: 'HARBOR', name: 'Harbor Balanced Fund', priceMinor: 16_240, changePercent: 0.34, category: 'Mutual fund', risk: 'Moderate', expenseRatio: 0.42 },
   { symbol: 'AURUM', name: 'Aurum Gold ETF', priceMinor: 6_450, changePercent: -0.22, category: 'ETF', risk: 'High', expenseRatio: 0.35 }
 ] as const;
-export function roundMinor(value: Decimal.Value) { return new Decimal(value).toDecimalPlaces(0, Decimal.ROUND_HALF_UP).toNumber(); }
+export function roundMinor(value: Decimal.Value) { const result=new Decimal(value).toDecimalPlaces(0, Decimal.ROUND_HALF_UP); if(!result.isFinite()||result.abs().gt(Number.MAX_SAFE_INTEGER))throw new Error('This amount exceeds the supported precision. Use a smaller amount or projection horizon.'); return result.toNumber(); }
 export function toMinor(rupees: string | number) { const n = new Decimal(rupees); if (!n.isFinite() || n.abs().gt(1e12)) throw new Error('Enter a valid amount'); return roundMinor(n.mul(100)); }
 export function holdingValue(h: Holding) { return roundMinor(new Decimal(h.quantity).mul(h.priceMinor)); }
 export function holdingCost(h: Holding) { return roundMinor(new Decimal(h.quantity).mul(h.averageCostMinor)); }

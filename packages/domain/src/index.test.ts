@@ -1,6 +1,6 @@
 import { describe,it,expect } from 'vitest';
 import { createDemoWorkspace } from '@wealthwise/demo-data';
-import { emptyWorkspace, workspaceSchema } from '@wealthwise/contracts';
+import { emptyWorkspace, workspaceSchema, holdingSchema } from '@wealthwise/contracts';
 import { applyCommand, netWorth, portfolioValue, monthlyCashflow, accountBalance, calculateSIP, calculateEMI, practicePortfolio, toMinor, transactionsCSV } from './index';
 const id='22222222-2222-4222-8222-222222222222';
 describe('financial invariants',()=>{
@@ -14,4 +14,5 @@ describe('financial invariants',()=>{
   it('fills practice orders exactly once at trusted fixture prices',()=>{const s=createDemoWorkspace();const t=applyCommand(s,{type:'place-order',id,symbol:'NOVA',quantity:10,side:'buy'},'2026-09-14T12:00:00.000Z');expect(practicePortfolio(t).cashMinor).toBe(98750000);expect(practicePortfolio(t).holdings[0].quantity).toBe(10);expect(netWorth(t)).toBe(netWorth(s));expect(()=>applyCommand(t,{type:'place-order',id,symbol:'NOVA',quantity:10,side:'buy'})).toThrow(/already/);expect(()=>applyCommand(s,{type:'place-order',id,symbol:'NOVA',quantity:1000,side:'buy'})).toThrow(/cash/);expect(()=>applyCommand(s,{type:'place-order',id,symbol:'NOVA',quantity:10,side:'sell'})).toThrow(/own/);});
   it('does not mutate previous state on invalid import',()=>{const s=createDemoWorkspace();const length=s.transactions.length;expect(()=>applyCommand(s,{type:'import-transactions',transactions:[s.transactions[0]]})).toThrow(/Duplicate/);expect(s.transactions).toHaveLength(length);});
   it('neutralizes spreadsheet formula injection in exports',()=>{const s=createDemoWorkspace();s.transactions[0].description='=HYPERLINK("https://example.com")';expect(transactionsCSV(s)).toContain("\"'=HYPERLINK");});
+  it('rejects positions and projections beyond safe numeric precision',()=>{const s=createDemoWorkspace();expect(holdingSchema.safeParse({...s.holdings[0],quantity:1000000,priceMinor:100000000000000}).success).toBe(false);expect(()=>calculateSIP(1000000000000,60,50)).toThrow(/precision/);});
 });
