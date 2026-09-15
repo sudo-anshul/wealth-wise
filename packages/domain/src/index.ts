@@ -10,7 +10,7 @@ export const instruments = [
   { symbol: 'HARBOR', name: 'Harbor Balanced Fund', priceMinor: 16_240, changePercent: 0.34, category: 'Mutual fund', risk: 'Moderate', expenseRatio: 0.42 },
   { symbol: 'AURUM', name: 'Aurum Gold ETF', priceMinor: 6_450, changePercent: -0.22, category: 'ETF', risk: 'High', expenseRatio: 0.35 }
 ] as const;
-export function roundMinor(value: Decimal.Value) { return new Decimal(value).toDecimalPlaces(0, Decimal.ROUND_HALF_UP).toNumber(); }
+export function roundMinor(value: Decimal.Value) { const result=new Decimal(value).toDecimalPlaces(0, Decimal.ROUND_HALF_UP); if(!result.isFinite()||result.abs().gt(Number.MAX_SAFE_INTEGER))throw new Error('This amount exceeds the supported precision. Use a smaller amount or projection horizon.'); return result.toNumber(); }
 export function toMinor(rupees: string | number) { const n = new Decimal(rupees); if (!n.isFinite() || n.abs().gt(1e12)) throw new Error('Enter a valid amount'); return roundMinor(n.mul(100)); }
 export function holdingValue(h: Holding) { return roundMinor(new Decimal(h.quantity).mul(h.priceMinor)); }
 export function holdingCost(h: Holding) { return roundMinor(new Decimal(h.quantity).mul(h.averageCostMinor)); }
@@ -53,6 +53,9 @@ export function practicePortfolio(state: Workspace) {
 const upsert=<T extends {id:string}>(list:T[],item:T)=>list.some(x=>x.id===item.id)?list.map(x=>x.id===item.id?item:x):[...list,item];
 export function applyCommand(previous:Workspace,input:Command,now=new Date().toISOString()):Workspace {
   const command=commandSchema.parse(input); const s=structuredClone(previous);
+  const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(now));
+  const postedDates=command.type==='upsert-transaction'?[command.transaction.date]:command.type==='transfer'?[command.date]:command.type==='import-transactions'?command.transactions.map(t=>t.date):command.type==='upsert-holding'?[command.holding.asOf]:[];
+  if(postedDates.some(date=>date>today))throw new Error('Use today or an earlier date for posted entries and valuations. Future plans belong in goals.');
   switch(command.type){
     case 'upsert-account': s.accounts=upsert(s.accounts,command.account);break;
     case 'delete-account': if(s.transactions.some(t=>t.accountId===command.id))throw new Error('Remove or move this account’s transactions first.');s.accounts=s.accounts.filter(a=>a.id!==command.id);break;
