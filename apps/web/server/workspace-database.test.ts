@@ -120,7 +120,16 @@ describe('normalized Supabase workspace persistence', () => {
     await expect(save(altered)).rejects.toMatchObject({ code: '22023' });
     const removed = structuredClone(state); removed.version++; removed.practiceOrders.shift();
     await expect(save(removed)).rejects.toMatchObject({ code: '22023' });
+    const retimed = structuredClone(state); retimed.version++; retimed.practiceOrders[0].filledAt = '2000-01-01T00:00:00.000Z';
+    await expect(save(retimed)).rejects.toMatchObject({ code: '22023' });
     expect((await get()).practiceOrders).toEqual(state.practiceOrders);
+  });
+
+  it('assigns new fill timestamps in the database instead of trusting a submitted time', async () => {
+    const proposed = order(await get()); proposed.practiceOrders[0].filledAt = '2000-01-01T00:00:00.000Z';
+    const saved = await save(proposed);
+    expect(saved.practiceOrders[0].filledAt).not.toBe(proposed.practiceOrders[0].filledAt);
+    expect(Math.abs(Date.now() - Date.parse(saved.practiceOrders[0].filledAt))).toBeLessThan(10_000);
   });
 
   it('rejects forged prices, overspending and selling an unowned position at the SQL boundary', async () => {
@@ -153,5 +162,30 @@ describe('normalized Supabase workspace persistence', () => {
     duplicate.budgets.push({ id: ORDER_A, category: 'Food', month: '2026-09', limitMinor: 10000 }, { id: ORDER_B, category: 'Food', month: '2026-09', limitMinor: 12000 });
     await expect(save(duplicate)).rejects.toMatchObject({ code: '23505' });
     expect((await get()).version).toBe(0);
+  });
+
+  it('rejects direct RPC values that would make the saved workspace unreadable at JavaScript precision', async () => {
+    const invalid = await get(); invalid.version++;
+    invalid.holdings.push({ id: ORDER_A, name: 'Oversized holding', symbol: 'NOVA', assetClass: 'Equity', quantity: 1000000, averageCostMinor: 100000000000000, priceMinor: 100000000000000, asOf: '2026-09-14' });
+    await expect(save(invalid)).rejects.toMatchObject({ code: '22023' });
+    expect((await get()).version).toBe(0);
+    expect((await get()).holdings).toEqual([]);
+
+    const combined = await get(); combined.version++;
+    combined.accounts = Array.from({ length: 100 }, (_, index) => ({ ...account(`20000000-0000-4000-8000-${String(index).padStart(12, '0')}`), openingBalanceMinor: 100000000000000 }));
+    await expect(save(combined)).rejects.toMatchObject({ code: '22023' });
+    expect((await get()).accounts).toEqual([]);
+  });
+
+  it('rejects future postings at the direct RPC boundary and preserves saved records', async () => {
+    const state = await save(applyCommand(await get(), { type: 'upsert-account', account: account() }));
+    const future = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const transaction = structuredClone(state); transaction.version++;
+    transaction.transactions.push({ id: ORDER_A, accountId: ACCOUNT_A, date: future, description: 'Future expense', category: 'Food', amountMinor: -100 });
+    await expect(save(transaction)).rejects.toMatchObject({ code: '22023' });
+    const holding = structuredClone(state); holding.version++;
+    holding.holdings.push({ id: ORDER_A, name: 'Future valuation', symbol: 'NOVA', assetClass: 'Equity', quantity: 1, averageCostMinor: 100, priceMinor: 100, asOf: future });
+    await expect(save(holding)).rejects.toMatchObject({ code: '22023' });
+    expect(await get()).toEqual(state);
   });
 });
