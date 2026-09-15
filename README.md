@@ -1,102 +1,75 @@
-Stock simulator : https://github.com/sudo-anshul/stock-market-simulator
-Multi Agent : https://github.com/sudo-anshul/multi-agent-advisor
-# InvestAI Assistant
+# WealthWise
 
-A modern investment guidance platform with AI-powered insights, portfolio management, and market analysis tools.
+**A clearer view. A richer life.**
 
-## Project Overview
+A personal-finance workspace for understanding money, reviewing investments, planning goals and learning through practice. Built as a modular **Next.js + TypeScript** application for **Vercel**, with **Supabase Auth and PostgreSQL** for personal accounts.
 
-InvestAI Assistant is designed to help users make informed investment decisions through:
+[Website](https://wealth-wise-gamma.vercel.app) · [Explore the demo](https://wealth-wise-gamma.vercel.app/demo) · [Figma design](https://www.figma.com/design/F5R5WIWueYTSWCVRUQrCk1?node-id=4-56) · [Architecture](docs/ARCHITECTURE.md) · [Deployment guide](docs/deployment.md)
 
-- AI-powered investment guidance
-- Portfolio tracking and management
-- Market analysis and trend visualization
-- Educational resources for investors of all levels
+## What you can do
 
-## Getting Started
+| Area | Included in this release |
+| --- | --- |
+| Money | Manual cash, savings and retirement accounts; income, expenses, paired transfers and monthly category budgets. |
+| Investments | Manual holdings with dated valuations, allocation, cost/gain calculations and a fictional market watchlist. |
+| Planning | Goals, earmarked savings, debt records, SIP/EMI/goal calculators and saved scenario inputs. |
+| Practice | Buy and sell fictional instruments with virtual cash, position checks and persistent fill history. |
+| Learning | Authored lessons, knowledge checks and completion progress. |
+| Review and data | Deterministic monthly insights, validated transaction CSV imports, activity exports and a JSON workspace archive. |
+| Identity | Email/password signup, confirmation, sign-in, recovery, password updates and session sign-out when Supabase is configured. |
 
-### Prerequisites
+The responsive interface pairs warm ivory and forest green with Instrument Serif and Manrope. Body text and standard controls use a readable 16px base, prominent financial figures use tabular numerals, and mobile navigation keeps the primary areas within reach.
 
-- Node.js & npm - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-- Firebase account for authentication and database
-- Cloudinary account for image storage
+## Demo and personal accounts
 
-### Installation
+`/demo` runs immediately without credentials. Its fictional workspace saves to **this browser's local storage**, survives refresh and can be restored with **Settings → Reset demo**. It does not sync across browsers and is separate from personal accounts. Clearing site storage removes local demo changes.
+
+`/app` requires Supabase authentication. Its records are loaded and saved through server handlers into normalized PostgreSQL tables with ownership policies and version-checked transactions. A new account starts empty. Demo changes are never copied into it automatically. Missing backend configuration disables authentication actions and reports account storage as unavailable; it does not silently substitute demo records.
+
+**Bank, brokerage, live market and AI providers are not connected.** Holdings use manual prices; market/practice instruments are fictional; insights use calculations. The monthly-review preference does not send notifications. All amounts are INR, with no foreign-exchange conversion. Supabase Storage is reserved for later file-retention features; current imports are validated in the browser and committed as transaction records.
+
+## Run locally
+
+Use **Node.js 22** and **pnpm 10.30.3**. The repository includes `.nvmrc` and a pinned `packageManager` field.
 
 ```sh
-# Clone the repository
-git clone <YOUR_GIT_URL>
-
-# Navigate to the project directory
-cd <YOUR_PROJECT_NAME>
-
-# Install dependencies
-npm install
-
-# Start the development server
-npm run dev
+nvm use
+corepack enable
+pnpm install --frozen-lockfile
+pnpm dev
 ```
 
-### Environment Setup
+Open [http://127.0.0.1:3000](http://127.0.0.1:3000), then explore `/demo`. If Corepack is unavailable, install pnpm 10.30.3 with your preferred package-manager installation method.
 
-Create a `.env` file in the root of your project with the following variables:
+To enable accounts, copy `.env.example` to `apps/web/.env.local`, configure a selected Supabase project, apply the migrations and set its auth URLs/email sender. Follow the [deployment guide](docs/deployment.md) and [backend reference](docs/backend.md). The demo does not require this setup.
 
-```
-# Firebase Configuration
-VITE_FIREBASE_API_KEY=your_api_key
-VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
-VITE_FIREBASE_PROJECT_ID=your_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
-VITE_FIREBASE_APP_ID=your_app_id
+## Verify a change
 
-# Cloudinary Configuration
-VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name
-VITE_CLOUDINARY_API_KEY=your_api_key
-VITE_CLOUDINARY_UPLOAD_PRESET=user_profiles
+```sh
+pnpm typecheck
+pnpm test
+pnpm build
 ```
 
-## Project Structure
+`pnpm check` runs all three. Typechecking first generates Next.js route types. Tests cover financial calculations, command rules, CSV handling, HTTP boundaries and the actual database migrations using PGlite. Hosted Supabase authentication, email delivery and deployment isolation still require the environment checks in the deployment guide.
 
-- `src/components/` - React components
-- `src/contexts/` - Context providers (Auth, Theme)
-- `src/hooks/` - Custom React hooks
-- `src/lib/` - Utility functions and configuration
-- `src/pages/` - Application pages
-- `src/types/` - TypeScript type definitions
-- `docs/` - Project documentation
+## Repository map
 
-## Features
+```text
+apps/web/                 Next.js routes, feature UI, server handlers and auth
+packages/contracts/       Zod schemas and command/workspace contracts
+packages/domain/          Financial arithmetic and pure state transitions
+packages/demo-data/       Deterministic, coherent fictional workspace
+supabase/migrations/      Normalized schema, ownership policies and atomic RPCs
+docs/                     Architecture, backend, migration and deployment guides
+legacy/vite/              Preserved original app, excluded from the workspace/build
+legacy/docs/              Historical architecture reference
+```
 
-- **User Authentication**: Secure login/signup via Firebase
-- **Profile Management**: User profiles with customizable settings and profile pictures
-- **Portfolio Tracking**: Track and manage investment portfolios
-- **Market Analysis**: Visual analysis of market trends and indices
-- **AI Guidance**: AI-powered investment recommendations and insights
-- **Learning Center**: Educational resources for investors
+Financial values use integer paise and decimal arithmetic. Transfers do not inflate income or expenses; goal earmarks and practice funds do not increase personal net worth. The [architecture](docs/ARCHITECTURE.md) explains the current persistence model and its limits. The [migration guide](docs/migration.md) records how the three original repositories relate to this application; no Firebase account or financial-data migration runs automatically.
 
-## Technologies Used
+## Contributing and attribution
 
-- **Frontend**: React, TypeScript, Tailwind CSS
-- **UI Components**: shadcn/ui
-- **Authentication & Database**: Firebase
-- **Image Storage**: Cloudinary
-- **State Management**: React Context API, TanStack Query
-- **Data Visualization**: Recharts
-- **Routing**: React Router
+Use focused feature branches and pull requests with the relevant checks and a preview of visible changes. See [Contributing](docs/CONTRIBUTING.md).
 
-## Deployment
-
-This project can be deployed using:
-
-1. **GitHub Pages**: Deploy directly from your GitHub repository
-2. **Netlify**: Connect your GitHub repository for automatic deployments
-3. **Vercel**: Import your project for seamless deployment
-
-## Contributing
-
-Please see our [Contributing Guidelines](docs/CONTRIBUTING.md) for details on how to contribute to this project.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+The self-hosted **Instrument Serif** and **Manrope** fonts retain their original, unchanged SIL Open Font License notices: [Instrument Serif](apps/web/public/fonts/InstrumentSerif-OFL.txt) and [Manrope](apps/web/public/fonts/Manrope-OFL.txt). Existing repository and dependency licensing is unchanged.

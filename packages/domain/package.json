@@ -1,0 +1,11 @@
+{
+  "name": "@wealthwise/domain",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@wealthwise/contracts": "workspace:*",
+    "decimal.js": "^10.6.0"
+  }
+}

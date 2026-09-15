@@ -1,0 +1,2 @@
+import Link from 'next/link';
+export default function NotFound(){return <main style={{maxWidth:720,padding:'100px 24px',margin:'auto'}}><p className="eyebrow">A little detour</p><h1 className="serif" style={{fontSize:56,margin:'20px 0'}}>This page has wandered off.</h1><p>The link may have changed. Your next step is a little closer to home.</p><Link className="button button-primary" style={{marginTop:30}} href="/">Back to WealthWise</Link></main>;}
