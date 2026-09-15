@@ -26,13 +26,28 @@ The Vercel build must have access to workspace files outside `apps/web`, includi
 | Area | Verified state |
 | --- | --- |
 | Database schema | Both committed migrations were applied together inside `BEGIN`/`COMMIT` through the Supabase dashboard to the verified empty WealthWise schema. The transaction succeeded. CLI migration-history reconciliation is still pending. |
+| Hosted catalog | Verified 12 application tables and 3 routines, with RLS enabled on every application table. Anonymous access and direct authenticated writes are denied; the private serializer is hidden. Expected practice-price, date and immutable-fill guards are present. No custom auth triggers were found. The CLI migration-history table is absent. |
+| Hosted database probe | All nine rollback-probe groups passed against the live schema; details follow below. The probe left zero fixture users and workspaces. |
+| Anonymous HTTP access | Both an anonymous table request and an anonymous `wealthwise_get_workspace` RPC request returned HTTP 401. |
 | Production configuration | The public Supabase environment variables and `NEXT_PUBLIC_SITE_URL=https://wealth-wise-gamma.vercel.app` are saved in Vercel's Production environment. |
 | Hosted auth configuration | The production origin and exact signup/recovery callback URLs for production and `http://127.0.0.1:4320` are saved. Email confirmation remains enabled; the minimum password length is 12. |
 | Preview build | [This Vercel preview](https://wealth-wise-44ioai97v-kihih22218-kelensoncoms-projects.vercel.app) built successfully. Production promotion is pending. |
 | Local verification | Typechecking, all 67 automated tests and the production build passed. Browser demo checks covered transactions, transfers, goals, practice trading and learning progress across reloads. |
-| Still to verify | Delivered signup/recovery emails, hosted authenticated sessions, hosted two-user isolation/concurrent saves and production smoke checks. These have not been established by the preview build or demo checks. |
+| Still to verify | Delivered signup/recovery emails, hosted authenticated browser sessions, two-user behavior through authenticated HTTP sessions, real concurrent saves from separate connections and production smoke checks. The SQL rollback probe and anonymous HTTP checks do not establish these flows. |
 
-This is a record of the checks above, not a claim that all release gates below are complete. Update it with evidence after promotion and hosted testing.
+The hosted rollback probe passed these nine groups:
+
+1. Empty-workspace bootstrap and a valid save.
+2. Rejection of a stale expected workspace version.
+3. Two-user RLS isolation and composite ownership foreign keys.
+4. Anonymous access denial.
+5. Trusted practice prices and overspend/oversell rejection.
+6. Atomic rollback when a later record fails validation.
+7. Authoritative fill timestamps and immutable existing fills.
+8. Quantity/monetary precision and date limits.
+9. Cleanup verification: zero fixture users or workspaces remained.
+
+These database checks used a rollback probe; they do not claim a delivered auth email or a real user browser session. This is a record of the checks above, not a claim that all release gates below are complete. Update it with evidence after promotion and authenticated testing.
 
 ## Local setup
 
@@ -77,7 +92,7 @@ Use the Supabase migration workflow from the repository root. After authenticati
 
 ### Reconciling the initial dashboard application
 
-The initial release applied `202609140001_workspace.sql` and `202609140002_atomic_commands.sql` together through the dashboard SQL editor, wrapped in one successful transaction. That applies the schema but does not reconcile Supabase CLI migration history. Do not run a normal push that attempts to reapply these already installed migrations.
+The initial release applied `202609140001_workspace.sql` and `202609140002_atomic_commands.sql` together through the dashboard SQL editor, wrapped in one successful transaction. The hosted catalog and rollback probe subsequently verified the installed application schema and its rules. The CLI migration-history table is absent, so migration metadata still needs reconciliation. Do not run a normal push that attempts to reapply these already installed migrations.
 
 Before repairing history, verify that the CLI is linked to `gvaiwmasgzclsnrlqpqy`, inspect the remote migration list, and compare the hosted tables, constraints, RLS/grants and function definitions with the exact committed files. Confirm that both versions completed and no partial or different schema is being marked as applied. Only after those checks should an operator run:
 
@@ -104,6 +119,25 @@ Use `http://127.0.0.1:3000` or `http://localhost:3000` consistently for local te
 The initial hosted configuration additionally allows the release test server at `http://127.0.0.1:4320`. This does not change the default development port. When testing at another origin or port, explicitly configure its exact callback URLs and use a matching site origin instead of relying on broad redirect wildcards.
 
 Set up a verified sender and custom SMTP/email provider before public onboarding. Supabase's built-in development sender has recipient and delivery limits. Sender identity, domain verification and delivery settings belong to the selected environment and must be checked there.
+
+### Recommended sender: Resend
+
+Use **Resend** for production auth email. **testmail.app** is a receiving inbox service for testing delivery; it does not replace the SMTP sender. Resend's [Supabase SMTP setup guide](https://resend.com/docs/send-with-supabase-smtp) requires a verified sending domain and a Resend API key.
+
+1. Add a domain you control in Resend, publish its requested DNS records and wait for verification.
+2. Create a Resend API key authorized to send from that domain.
+3. In the dedicated WealthWise Supabase project's **Authentication → SMTP settings**, enable custom SMTP and set:
+
+| Setting | Value |
+| --- | --- |
+| SMTP host | `smtp.resend.com` |
+| Port | `465` |
+| Username | `resend` |
+| Password | The Resend API key, stored only in the Supabase SMTP secret field. |
+| Sender email | An address on the verified domain, such as `no-reply@YOUR_VERIFIED_DOMAIN`. |
+| Sender name | `WealthWise` |
+
+Save the settings, then test signup confirmation and password recovery with an inbox you can inspect; a testmail.app inbox can serve that purpose. Verify delivery and complete the links in a browser against the correct callback origin. Keep confirmation enabled. Do not put the SMTP key in application code, GitHub, browser-visible environment variables or screenshots. This setup is a follow-up requirement; no working Resend sender or delivered message has been verified for this release.
 
 The standard PKCE flow expects the browser that initiated signup/recovery. To support confirmation links opened in another browser, use the implemented token-hash routes in the Supabase email templates:
 
