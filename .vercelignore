@@ -1,0 +1,12 @@
+.git/
+node_modules/
+**/node_modules/
+**/.next/
+**/*.tsbuildinfo
+**/.env*
+legacy/
+work/
+coverage/
+test-results/
+playwright-report/
+.DS_Store
