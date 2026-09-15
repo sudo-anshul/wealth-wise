@@ -31,9 +31,11 @@ The Vercel build must have access to workspace files outside `apps/web`, includi
 | Anonymous HTTP access | Both an anonymous table request and an anonymous `wealthwise_get_workspace` RPC request returned HTTP 401. |
 | Production configuration | The public Supabase environment variables and `NEXT_PUBLIC_SITE_URL=https://wealth-wise-gamma.vercel.app` are saved in Vercel's Production environment. |
 | Hosted auth configuration | The production origin and exact signup/recovery callback URLs for production and `http://127.0.0.1:4320` are saved. Email confirmation remains enabled; the minimum password length is 12. |
-| Preview build | [This Vercel preview](https://wealth-wise-44ioai97v-kihih22218-kelensoncoms-projects.vercel.app) built successfully. Production promotion is pending. |
+| Preview build | [This Vercel preview](https://wealth-wise-44ioai97v-kihih22218-kelensoncoms-projects.vercel.app) built successfully. |
+| Production release | The initial release was deployed from `9d3c56b` and aliased to [wealth-wise-gamma.vercel.app](https://wealth-wise-gamma.vercel.app). Deployment `dpl_45HQFbB865p8z6NdbpUMitpXXMsz` reached READY. Homepage and dashboard were visually checked at 390px and desktop widths with no horizontal page overflow; body text is 16px. The mobile navigation drawer works. |
+| Production access boundaries | Unauthenticated `/api/workspace` returns 401 with `private, no-store`; `/app` redirects to `/login` with private/no-store caching. The deployed preview also correctly rejects an invalid sign-in. |
 | Local verification | Typechecking, all 67 automated tests and the production build passed. Browser demo checks covered transactions, transfers, goals, practice trading and learning progress across reloads. |
-| Still to verify | Delivered signup/recovery emails, hosted authenticated browser sessions, two-user behavior through authenticated HTTP sessions, real concurrent saves from separate connections and production smoke checks. The SQL rollback probe and anonymous HTTP checks do not establish these flows. |
+| Still to verify | Delivered signup/recovery emails, hosted authenticated browser sessions, two-user behavior through authenticated HTTP sessions, real concurrent saves from separate connections. The SQL rollback probe and anonymous HTTP checks do not establish these flows. |
 
 The hosted rollback probe passed these nine groups:
 
@@ -44,10 +46,12 @@ The hosted rollback probe passed these nine groups:
 5. Trusted practice prices and overspend/oversell rejection.
 6. Atomic rollback when a later record fails validation.
 7. Authoritative fill timestamps and immutable existing fills.
-8. Quantity/monetary precision and date limits.
-9. Cleanup verification: zero fixture users or workspaces remained.
+8. Practice buy/sell cash reconciliation and oversell rejection.
+9. Safe aggregate monetary precision and India-calendar posting limits.
 
-These database checks used a rollback probe; they do not claim a delivered auth email or a real user browser session. This is a record of the checks above, not a claim that all release gates below are complete. Update it with evidence after promotion and authenticated testing.
+Cleanup was checked separately: zero fixture users or workspaces remained.
+
+These database checks used a rollback probe; they do not claim a delivered auth email or a real user browser session. This is a record of the checks above, not a claim that all release gates below are complete. Update it with evidence after authenticated testing. GitHub and Vercel record subsequent deployment revisions and their checks.
 
 ## Local setup
 
