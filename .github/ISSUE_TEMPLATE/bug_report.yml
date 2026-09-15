@@ -1,0 +1,31 @@
+name: Bug report
+description: Report behavior that is not working as expected.
+title: "bug: "
+body:
+  - type: markdown
+    attributes:
+      value: Keep personal financial records, passwords, tokens and account identifiers out of public reports.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe the page, expected behavior and actual behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Use fictional example data where possible.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: Browser, operating system, demo or personal workspace, preview or production
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Screenshots or error message
+      description: Remove personal details before attaching evidence.
