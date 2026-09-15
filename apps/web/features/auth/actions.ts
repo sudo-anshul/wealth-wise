@@ -1,12 +1,13 @@
 'use server';
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
-import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { clearSupabaseSessionCookies, createSupabaseServerClient } from '@/lib/supabase/server';
 import { configuredSiteUrl } from '@/lib/supabase/config';
 
 export type AuthState = { error?: string; success?: string; fields?: Record<string, string> };
 const emailSchema = z.email().max(254);
 const passwordSchema = z.string().min(12, 'Use at least 12 characters.').max(128, 'Use no more than 128 characters.');
+const signupAcknowledgement = 'If this address can be registered, check your inbox and spam folder for the next step. You can also sign in or try again later.';
 
 function invalid(error: z.ZodError): AuthState {
   const fields: Record<string, string> = {};
@@ -32,9 +33,9 @@ export async function signUpAction(_state: AuthState, form: FormData): Promise<A
   if (!client || !site) return unavailable();
   const { data, error } = await client.auth.signUp({ email: parsed.data.email, password: parsed.data.password, options: { data: { display_name: parsed.data.name }, emailRedirectTo: `${site}/auth/callback` } });
   // Do not disclose whether an email address already belongs to another account.
-  if (error) return { success: 'If this address can be registered, check your inbox for the next step. You can also sign in or try again later.' };
+  if (error) return { success: signupAcknowledgement };
   if (data.session) redirect('/app');
-  return { success: 'If verification is needed, we will email the next step. Check your inbox and spam folder, then follow the link to continue.' };
+  return { success: signupAcknowledgement };
 }
 
 export async function recoverAction(_state: AuthState, form: FormData): Promise<AuthState> {
@@ -55,12 +56,14 @@ export async function updatePasswordAction(_state: AuthState, form: FormData): P
   if (!data.user) return { error: 'This recovery session is no longer available. Request a new recovery link.' };
   const { error } = await client.auth.updateUser({ password: parsed.data.password });
   if (error) return { error: 'The password could not be updated. Request a fresh recovery link and try a different password.' };
-  await client.auth.signOut({ scope: 'local' });
+  await client.auth.signOut({ scope: 'local' }).catch(() => undefined);
+  await clearSupabaseSessionCookies();
   redirect('/login?updated=1');
 }
 
 export async function signOutAction() {
   const client = await createSupabaseServerClient();
-  if (client) await client.auth.signOut({ scope: 'local' });
+  if (client) await client.auth.signOut({ scope: 'local' }).catch(() => undefined);
+  await clearSupabaseSessionCookies();
   redirect('/login');
 }

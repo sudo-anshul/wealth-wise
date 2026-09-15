@@ -1,73 +1,50 @@
+# Contributing to WealthWise
 
-# Contributing to InvestAI Assistant
+Build focused changes that make the product clearer, more useful and reliable. Follow the existing [Code of Conduct](CODE_OF_CONDUCT.md).
 
-Thank you for your interest in contributing to InvestAI Assistant! This document provides guidelines and instructions for contributing to this project.
+## Development
 
-## Code of Conduct
+Use Node.js 22 and pnpm 10.30.3 from the repository root:
 
-Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md) to help us maintain a healthy and welcoming community.
+```sh
+nvm use
+corepack enable
+pnpm install --frozen-lockfile
+pnpm dev
+```
 
-## How Can I Contribute?
+Open `http://127.0.0.1:3000/demo` for a complete fictional workspace without cloud credentials. Personal accounts require the setup in the [deployment guide](deployment.md). Keep `.env.local`, access tokens and real personal data out of commits, public issues and screenshots.
 
-### Reporting Bugs
+The active application is in `apps/web`. Shared validation belongs in `packages/contracts`; financial calculations and domain commands belong in `packages/domain`; coherent fixtures belong in `packages/demo-data`. Treat `legacy/` as a migration reference rather than another active app.
 
-- Check if the bug has already been reported in the Issues section
-- Use the bug report template when creating a new issue
-- Include detailed steps to reproduce the bug
-- Include screenshots if applicable
-- Specify your environment (browser, OS, etc.)
+## Branches and pull requests
 
-### Suggesting Features
+Create a branch for a coherent feature or fix, such as `feat/goal-planning` or `fix/transfer-validation`. Use clear imperative commit messages describing the resulting change. Preserve actual work dates and authorship.
 
-- Check if the feature has already been suggested in the Issues section
-- Use the feature request template when creating a new issue
-- Provide a clear description of the feature and its benefits
-- Include mockups or diagrams if applicable
+Keep each PR reviewable: explain the user-visible problem, resulting behavior and relevant validation. For UI changes, include a preview or screenshots at representative desktop/mobile widths. For dependent PRs, state the prerequisite and use the appropriate base branch so the diff shows only the new work. Update documentation when setup or behavior changes.
 
-### Code Contributions
+Before opening or updating a PR, run:
 
-1. Fork the repository
-2. Create a new branch for your feature or bugfix
-3. Write your code following the coding standards
-4. Add or update tests as necessary
-5. Ensure all tests pass
-6. Submit a pull request
+```sh
+pnpm typecheck
+pnpm test
+pnpm build
+```
 
-## Development Setup
+Typechecking generates Next.js route types first. The CI workflow runs the same checks with the committed lockfile and no cloud credentials. Report checks that did not run accurately; a passing build does not prove hosted authentication, email delivery or access isolation.
 
-1. Fork and clone the repository
-2. Install dependencies with `npm install`
-3. Set up environment variables (see README.md)
-4. Start the development server with `npm run dev`
+## Implementation conventions
 
-## Pull Request Process
+Use strict TypeScript and shared Zod schemas at input boundaries. Keep framework-independent financial rules out of React components. Monetary values use integer paise, quantities have defined precision and estimates expose their assumptions. Do not introduce random data into financial history, mix practice funds into personal totals or silently substitute fixtures when a provider fails.
 
-1. Update the README.md or documentation with details of your changes if applicable
-2. Update the tests as necessary
-3. Ensure your code follows the project's coding standards
-4. Your PR will be reviewed by maintainers, who may request changes
-5. Once approved, your PR will be merged
+Test changed financial invariants, import behavior and access boundaries. Avoid tests that merely duplicate a trivial implementation. For visible changes, verify keyboard access, labeled controls, focus and responsive layout. Read the installed Next.js documentation before relying on a version-specific API; the app's `AGENTS.md` identifies this requirement.
 
-## Coding Standards
+For database changes, add an ordered migration and meaningful allowed/denied-path tests. Keep ownership, optimistic concurrency and practice ledger rules intact. Never modify an applied migration just to make a new schema appear; introduce a new migration and describe compatibility/rollback in the PR. Rehearse hosted changes on staging before production.
 
-- Follow the existing code style
-- Use TypeScript for all new code
-- Write clear, descriptive commit messages
-- Keep components small and focused on a single responsibility
-- Comment complex code sections
-- Write tests for new features
+## Issues
 
-## Commit Messages
+Search existing issues first. A bug report should include the route, reproduction steps, expected/actual behavior and browser/environment. Use fictional records and remove private information. A feature request should describe the task it helps a user accomplish and any constraints. The issue tracker is not a private channel for account data or credentials.
 
-- Use the present tense ("Add feature" not "Added feature")
-- Use the imperative mood ("Move cursor to..." not "Moves cursor to...")
-- Limit the first line to 72 characters or less
-- Reference issues and pull requests after the first line
+## References and attribution
 
-## Additional Resources
-
-- [Firebase Documentation](https://firebase.google.com/docs)
-- [React Documentation](https://reactjs.org/docs/getting-started.html)
-- [TypeScript Documentation](https://www.typescriptlang.org/docs/)
-- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
-- [shadcn/ui Documentation](https://ui.shadcn.com/)
+Read the [architecture](ARCHITECTURE.md), [backend reference](backend.md) and [migration guide](migration.md) for current boundaries. Preserve the included font copyright and SIL Open Font License notices and all existing third-party attribution when moving or replacing assets.

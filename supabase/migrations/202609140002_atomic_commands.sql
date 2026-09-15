@@ -25,6 +25,21 @@ begin
   if exists(select 1 from jsonb_array_elements(p_workspace->'holdings') x where (x->>'quantity')::numeric*1000000 <> trunc((x->>'quantity')::numeric*1000000)) then
     raise exception 'Holding quantity exceeds supported precision' using errcode='22023';
   end if;
+  -- This RPC is reachable by authenticated API clients as well as the Next.js
+  -- command handler. Keep values readable by the application's safe-integer
+  -- contract even when a caller bypasses its Zod validation.
+  if (
+    coalesce((select sum((x->>'openingBalanceMinor')::numeric) from jsonb_array_elements(p_workspace->'accounts') x),0)
+    + coalesce((select sum(abs((x->>'amountMinor')::numeric)) from jsonb_array_elements(p_workspace->'transactions') x),0)
+    + coalesce((select sum(round((x->>'quantity')::numeric*(x->>'priceMinor')::numeric)+round((x->>'quantity')::numeric*(x->>'averageCostMinor')::numeric)) from jsonb_array_elements(p_workspace->'holdings') x),0)
+    + coalesce((select sum((x->>'balanceMinor')::numeric) from jsonb_array_elements(p_workspace->'debts') x),0)
+  ) > 9007199254740991 then
+    raise exception 'Workspace values exceed supported precision' using errcode='22023';
+  end if;
+  if exists(select 1 from jsonb_array_elements(p_workspace->'transactions') x where (x->>'date')::date > (clock_timestamp() at time zone 'Asia/Kolkata')::date)
+    or exists(select 1 from jsonb_array_elements(p_workspace->'holdings') x where (x->>'asOf')::date > (clock_timestamp() at time zone 'Asia/Kolkata')::date) then
+    raise exception 'Posted entries and valuations cannot be future dated' using errcode='22023';
+  end if;
   -- Transfers must remain paired, balanced and scoped to two owned accounts.
   if exists(
     select 1 from jsonb_array_elements(p_workspace->'transactions') x where x->>'transferId' is not null
