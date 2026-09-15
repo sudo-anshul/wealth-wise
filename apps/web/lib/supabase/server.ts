@@ -17,3 +17,16 @@ export async function createSupabaseServerClient() {
     }
   });
 }
+
+/** Clear this project's browser session even if remote refresh-token revocation is unavailable. */
+export async function clearSupabaseSessionCookies() {
+  const config = supabaseConfig();
+  if (!config) return;
+  const prefix = `sb-${new URL(config.url).hostname.split('.')[0]}-auth-token`;
+  const store = await cookies();
+  for (const { name } of store.getAll()) {
+    if (name === prefix || name.startsWith(`${prefix}.`) || name === `${prefix}-code-verifier`) {
+      store.set(name, '', { path: '/', maxAge: 0, sameSite: 'lax', secure: process.env.NODE_ENV === 'production' });
+    }
+  }
+}
